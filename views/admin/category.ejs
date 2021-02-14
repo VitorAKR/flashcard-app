@@ -1,0 +1,301 @@
+<%- include("inc/header") -%>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <h1>
+          Categorias
+        </h1>
+        <ol class="breadcrumb">
+          <li><a href="/"><i class="fa fa-home" style="color: #444"></i> Home</a></li>
+          <li class="active">Categorias</li>
+        </ol>
+      </section>
+
+      <!-- Main content -->
+      <section class="content container-fluid">
+
+        <div class="row">
+          <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-green">
+              <div class="inner">
+                <h3 id="number-categories"></h3>
+  
+                <p>Categorias</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-ios-bookmarks-outline"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="box box-success">
+          <div class="box-header">
+            <h3 class="box-title">Lista de Categorias</h3>
+            <div class="col-sm-6">
+              <div class="dataTables_filter">
+                <label>Pesquisar:<input type="search" id="myInput" onkeyup="mySearchFunction()" class="form-control input-sm" placeholder="Pesquise pelo nome.." aria-controls="example1"></label>
+              </div>
+            </div>
+            <a href="#" class="btn btn-xs pull-right btn-success" data-toggle="modal" data-target="#modal-create"><i
+                class="fa fa-plus"></i> Novo</a>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body no-padding">
+            <table class="table table-bordered table-hover dataTable">
+              <thead>
+                <tr>
+                  <th class="sorting" style="width: 10px">#</th>
+                  <th class="sorting">Nome</th>
+                  <th class="sorting">Descrição</th>
+                  <th class="sorting">Idioma</th>
+                  <th style="width: 204px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tableCategory">
+                <% data.forEach(function(row){ %>
+                <tr data-row="<%= JSON.stringify(row); %>">
+                  <td><%= row.id %></td>
+                  <td><%= row.name %></td>
+                  <td><%= row.description %></td>
+                  <td><%= row.lang %></td>
+                  <td><button type="button" class="btn btn-xs btn-info btn-update"><i
+                        class="fa fa-pencil"></i> Editar</button>&nbsp;<button type="button" class="btn btn-xs btn-danger btn-delete"><i
+                        class="fa fa-trash"></i> Excluir</button></td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <!-- /.box-body -->
+        </div>
+      </section>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    <!--- FORMULARIO CREATE  -->
+    <div class="modal fade" id="modal-create">
+      <div class="modal-dialog">
+        <div class="modal-content" style="border-top: 3px solid #00a65a;">
+          <form method="post" action="/admin/category">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h4 class="modal-title">Nova Categoria</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="inputTitleCreate">Nome</label>
+                <input type="text" class="form-control" id="inputTitleCreate" oninput="verifyCategoryName(event)" name="name" required="required">
+              </div>
+              <div class="form-group">
+                <label for="inputDescriptionCreate">Descrição</label>
+                <textarea class="form-control" id="inputDescriptionCreate" name="description" required="required"></textarea>
+              </div>
+              <div class="row form-group">
+                <div class="col-md-12">
+                    <label for="inputLang">Idioma</label>
+                    <select id="inputLang" name="lang" class="form-control">
+                        <option value="pt-BR">Português</option>
+                        <option value="de">Alemão</option>
+                        <option value="es">Espanhol</option>
+                        <option value="en-US">Inglês</option>
+                        <option value="it">Italiano</option>
+                        <option value="fr">Francês</option>
+                    </select>
+                </div>
+             </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-success" id="btnSave">Salvar</button>
+            </div>
+          </form>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+    <!--- FORMULARIO UPDATE  -->
+    <div class="modal fade" id="modal-update">
+      <div class="modal-dialog">
+        <div class="modal-content" style="border-top: 3px solid #00c0ef;">
+          <form method="post" action="/admin/category">
+            <input type="hidden" name="id">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h4 class="modal-title">Editar Categoria</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="inputTitleUpdate">Nome</label>
+                <input type="text" class="form-control" id="inputTitleUpdate" name="name">
+              </div>
+              <div class="form-group">
+                <label for="inputDescriptionUpdate">Descrição</label>
+                <textarea class="form-control" id="inputDescriptionUpdate" name="description"></textarea>
+              </div>
+              <div class="row form-group">
+                <div class="col-md-12">
+                  <label for="inputLang">Idioma</label>
+                  <select id="inputLang" name="lang" class="form-control">
+                    <option value="pt-BR">Português</option>
+                    <option value="de">Alemão</option>
+                    <option value="es">Espanhol</option>
+                    <option value="en-US">Inglês</option>
+                    <option value="it">Italiano</option>
+                    <option value="fr">Francês</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-info">Salvar</button>
+            </div>
+          </form>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+
+<%- include("inc/footer") -%>
+
+<script src="/js/proto-formsave.js"></script>
+<script>
+//Formulario do Create ---------------------------------------------------
+let formCreate = document.querySelector("#modal-create form");
+
+  formCreate.save().then(json =>{
+    window.location.reload();
+
+  }).catch(err =>{
+    console.log(err);
+  });
+
+//Formulario do Update ---------------------------------------------------
+let formUpdate = document.querySelector("#modal-update form");
+
+  formUpdate.save().then(json =>{
+    window.location.reload();
+
+  }).catch(err =>{
+    console.log(err);
+  });
+//----------------------------- BOTOES EXCLUIR ---------------------------
+  //percorrer todos os botões delete
+  [...document.querySelectorAll('.btn-delete')].forEach(btn =>{
+    btn.addEventListener('click', e=>{
+
+      let tr = e.path.find(el => {
+        return (el.tagName.toUpperCase() == 'TR');
+      });
+
+      let data = JSON.parse(tr.dataset.row);
+      //console.log(data.id); //mostra o ID da linha
+      
+      //perguntar se deseja mesmo excluir
+      if(confirm(`Deseja realmente excluir a categoria: ${data.name}?`)){
+        //uma vez que temos o ID precisamos passar isso pro fetch
+        fetch(`/admin/category/${data.id}` , {
+          method: 'DELETE'
+        }).then(response => response.json())
+          .then(json =>{
+            //console.log(json);
+            window.location.reload();
+          });
+      }
+
+    });
+  });
+//------------------------------- BOTOES EDITAR ---------------------------------
+  //percorrer todos os botões editar (converter em array)
+  [...document.querySelectorAll('.btn-update')].forEach(btn =>{
+
+    btn.addEventListener('click', e=>{
+      //a partir do evento pega a tr
+      let tr = e.path.find(el=>{
+        return (el.tagName.toUpperCase() == 'TR');
+      });
+      //da tr pega-se os dados da linha
+      let data = JSON.parse(tr.dataset.row);
+      //console.log(data);
+      //percorrer dados pra trazer no formulario
+
+      for(let name in data){
+        let input = formUpdate.querySelector(`[name=${name}]`);
+        if(input) input.value = data[name];
+
+      }
+      //abre o modal
+      $('#modal-update').modal('show');
+    });
+  });
+//------------------------CONTADOR---------------------------------------
+let tableEl = document.querySelector("#tableCategory");
+
+let numberCategories = 0;
+
+for (var i = 0, row; row = tableEl.rows[i]; i++) {
+  numberCategories++;
+}
+
+//console.log(numberCategories);
+document.querySelector("#number-categories").innerHTML = numberCategories;
+
+//------------------------------- SEARCHING ---------------------------------
+function mySearchFunction() {
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("tableCategory");
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+    //restringir a coluna nome
+    td = tr[i].getElementsByTagName("td")[1];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }       
+  }
+}
+//----------------------------- VERIFY CATEGORY ------------------------------
+function verifyCategoryName(event){
+  var inputName, filter, btnSave, table, tr, td, tableContent;
+  inputName = event.target.value;
+  filter = inputName.toUpperCase();
+  table = document.getElementById("tableCategory");
+  tr = table.getElementsByTagName("tr");
+  btnSave = document.getElementById("btnSave");
+  // percorrer tabela
+  for (i = 0; i < tr.length; i++) {
+    //restringir a coluna nome categoria pra comparar
+    td = tr[i].getElementsByTagName("td")[1];
+    if(td){
+      tableContent = td.textContent || td.innerText;
+      console.log(tableContent);
+      console.log(filter);
+      if (tableContent.toUpperCase().localeCompare(filter) == 0) {
+        //se o input for igual ao content table 
+        //desabilita o botão e para de percorrer
+        btnSave.disabled=true;
+        break;
+      }else{
+        btnSave.disabled=false;
+      }
+    }
+  }
+
+}
+</script>

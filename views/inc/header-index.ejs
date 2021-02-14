@@ -1,0 +1,69 @@
+<header id="gtco-header" class="gtco-cover gtco-cover-md" role="banner" style="background-image: url(images/img_bg_1.jpg)"
+data-stellar-background-ratio="0.5">
+   <div class="overlay"></div>
+   <div class="gtco-container">
+       <div class="row">
+           <div class="col-md-12 col-md-offset-0 text-left">
+
+
+               <div class="row row-mt-15em">
+                   <div class="col-md-7 mt-text animate-box" data-animate-effect="fadeInUp">
+                       <span class="intro-text-small">TCC por
+                           <a href="#" target="_blank">Vitor Reiter</a>
+                       </span>
+                       <h1 class="cursive-font">FlashCard App</h1>
+                   </div>
+                   <div class="col-md-4 col-md-push-1 animate-box" data-animate-effect="fadeInRight">
+                       <div class="form-wrap">
+                           <div class="tab">
+
+                               <div class="tab-content">
+                                   <div class="tab-content-inner active" data-content="signup">
+                                       <h3 class="cursive-font">Cadastre-se Agora</h3>
+                                       <%- include("./../content/alerts") -%>
+                                       <form action="/" method="post">
+                                           <div class="row form-group">
+                                               <div class="col-md-12">
+                                                   <label for="inputName">Nome Completo</label>
+                                                   <input type="text" id="inputName" name="name" class="form-control" value="<%= body.name%>">
+                                               </div>
+                                           </div>
+                                           <div class="row form-group">
+                                               <div class="col-md-12">
+                                                   <label for="inputEmail">E-mail</label>
+                                                   <input type="email" id="inputEmail" name="email" class="form-control" value="<%= body.email%>">
+                                               </div>
+                                           </div>
+                                           <div class="row form-group">
+                                               <div class="col-md-12">
+                                                   <label for="inputPassword">Senha</label>
+                                                   <input type="password" id="inputPassword" name="password" class="form-control" value="<%= body.password%>">
+                                               </div>
+                                           </div>
+                                           <div class="row form-group">
+                                               <div class="col-md-12">
+                                                   <label for="inputPassword2">Redigite a senha</label>
+                                                   <input type="password" id="inputPassword2" name="password2" class="form-control" value="<%= body.password2%>">
+                                               </div>
+                                           </div>
+
+                                           <div class="row form-group">
+                                               <div class="col-md-12">
+                                                   <input type="submit" class="btn btn-primary btn-block" value="Cadastrar">
+                                               </div>
+                                           </div>
+                                       </form>
+                                   </div>
+
+
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+
+
+           </div>
+       </div>
+   </div>
+</header>

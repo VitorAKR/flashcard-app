@@ -1,0 +1,239 @@
+<%- include("inc/header") -%>
+
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <h1>
+          Lições
+        </h1>
+        <ol class="breadcrumb">
+          <li><a href="/"><i class="fa fa-home" style="color: #444"></i> Home</a></li>
+          <li class="active">Lições</li>
+        </ol>
+      </section>
+
+      <!-- Main content -->
+      <section class="content container-fluid">
+        <div class="row">
+          <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-blue">
+              <div class="inner">
+                <h3 id="numberCard">0</h3>
+                <p>Flashcards restantes</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-ios-compose"></i>
+              </div>
+            </div>
+          </div>
+           
+          <div class="col-lg-9 col-xs-6">
+            <div class="box box-primary">
+              <div class="box-header">
+                <h3 class="box-title">Escolher Lição</h3>
+              </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group" style="padding-left: 10px; padding-right: 10px;">
+                      <label for="inputSelectCategoryLesson">Categoria</label>
+                      <select class="form-control" onchange="enableBtnStart(this.value)" id="inputSelectCategoryLesson" name="category">
+                        <option>Escolha categoria..</option>
+                          <% listData.forEach(function(rowList){ %>
+                            <option><%= rowList.name %></option>
+                          <% }); %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group" style="padding-left: 10px; padding-right: 10px;">
+                      <button type="button" onclick="initLesson()" id="btnStart" disabled class="btn btn-block btn-primary btn-lg">Iniciar</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+    
+          </div>
+         
+        </div>
+
+        <div class="box box-primary" id ="box-card-area" style="display: none;">
+          <div class="box-header">
+            <h3 class="box-title">FlashCard da Lição</h3>
+          </div>
+          <div class="card_row">
+            <div class="card-container">
+              <div class="card">
+                  <div class="front">
+                      <div class="result"></div>
+                  </div>
+                  <div class="back">
+                      <div class="text"></div>
+                      <div class="category-card"></div>
+                      <div hidden class="category-lang"></div>
+                      <!--<a href="#"><i class="fa fa-volume-up"></i><span> Ouvir</span></a>-->
+                      <button onclick="speak()"><i class="fa fa-volume-up"></i>Ouvir</button>
+                  </div>
+              </div>
+            </div>
+          </div>
+            <!-- /.box-body -->
+          <div class="box-footer">
+            <button type="submit" onclick="btnIncorrect()" class="btn  btn-danger btn-lg">Incorreto</button>
+            <button type="submit" onclick="btnCorrect()" class="btn  btn-success btn-lg pull-right">Correto</button>
+          </div>
+        </div>
+
+
+      </section>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+<%- include("inc/footer") -%>
+<script src="/js/audio-speechsynthesisutterance.js"></script>
+<script>
+  //pegar texto, area do card, botão Iniciar
+  const lessonArea = document.getElementById("box-card-area");
+  const btnStart = document.getElementById("btnStart");
+  //receber os flashcards da rota
+  const jsonCards = JSON.parse('<%- JSON.stringify(cards) %>');
+  console.log(jsonCards);
+
+  let shuffledCards, currentIndexCard, categoryCards;
+
+  function showCard(card){
+    //colocar as infos de card no html
+    document.querySelector(".result").innerText = card.front;
+    document.querySelector(".text").innerText = card.back;
+    document.querySelector(".category-card").innerText = card.category;
+    document.querySelector(".category-lang").innerText = card.lang;
+  }
+
+  function shuffledArray(array){
+      //o Math.random gera numero de 0 a 0.99999, subtraindo por 0.5, 
+      //geramos 50% disso ser alternado pra um direção ou outra,
+      //pois o sort() alterna a ordem dependendo se o número for maior ou menor
+      return shuffled = array.sort(() => Math.random() - 0.5);
+  }
+
+  function selectCardsOfCategory(value, array){
+    //retorna array com base no valor de categoria
+    let filteredCards = array.filter((card) =>{
+      return card.category == value;
+    });
+    return filteredCards;
+  }
+
+  function setNextCard(){
+    //se não chegou ao final das cartas incrementa a próxima
+    if(shuffledCards.length > currentIndexCard+1){
+      currentIndexCard ++;
+      showCard(shuffledCards[currentIndexCard]);
+      countUpdate(currentIndexCard, shuffledCards.length);
+    }else{
+      alert("Você chegou ao final dessa lição");
+      window.location.reload();
+    }
+
+  }
+
+  //--------------------------- SELECT CATEGORY ------------------------------
+  function enableBtnStart(value){
+    if(value == "Escolha categoria.."){
+      btnStart.disabled=true;
+      showModalCard(false);
+      countUpdate(0, 0);
+    }else{
+      btnStart.disabled=false;
+      categoryCards = selectCardsOfCategory(value, jsonCards);
+      //console.log(categoryCards);
+
+      //verifica se a categoria escolhida possui cartas pra serem estudadas
+      if(categoryCards === undefined || categoryCards.length == 0){
+        btnStart.disabled=true;
+        showModalCard(false);
+        countUpdate(0, 0);
+        alert("A categoria escolhida não possui mais flashcards para estudar!\nPor favor, selecione outra categoria ou cadastre mais flashcards.");
+      }
+    }
+  }
+
+  //--------------------------- BTN Iniciar -----------------------------------
+  function initLesson(){
+    //apresentar area da lição e começar com o primeiro flashcard
+      showModalCard(true);
+      currentIndexCard = 0;
+      shuffledCards = shuffledArray(categoryCards);
+      //console.log(shuffledCards);
+      showCard(shuffledCards[currentIndexCard]);
+      countUpdate(currentIndexCard, shuffledCards.length);
+  }
+  //-------------------------- BTN Correta ------------------------------------
+  function btnCorrect(){
+    saveData(shuffledCards[currentIndexCard]);
+    setNextCard();
+  }
+  
+  //-------------------------- BTN Incorreta ------------------------------------
+  function btnIncorrect(){
+    setNextCard();
+  }
+  //-------------------------- Modal Area -------------------------------------
+  function showModalCard(show = true){
+    lessonArea.style.display = (show) ? 'block' : 'none';
+  }
+
+  //--------------------------- BTN Ouvir -------------------------------------
+  function speak(){
+    //checar se o audio esta disponível pro navegador
+    if ('speechSynthesis' in window) {
+      //pega o conteúdo do verso
+      let backText = document.querySelector(".text").innerText;
+      let backLang = document.querySelector(".category-lang").innerText;
+      //checa se o conteúdo está vazio
+      if (backText.length > 0) {
+        new AudioSpeechSynthesisUtterance(backText, backLang);
+      }else{
+        alert("Speech Synthesis: Não foi possível reproduzir o aúdio.")
+      }
+    } else {
+      alert("Infelizmente seu navegador não suporta Speech Synthesis!");
+    }
+  }
+  //------------------------- Card Info -------------------------------------
+  function countUpdate(cardNumber, arraySize){
+    let countCards = arraySize - cardNumber;
+    document.getElementById("numberCard").innerText = countCards;
+  }
+
+  //------------------------ Enviar pro DB ----------------------------------
+  function saveData(card){
+
+    let data = JSON.stringify(card);
+
+    let xhr = new XMLHttpRequest();
+
+    xhr.onload = () =>{
+      //imprime JSON
+      if(xhr.status >= 200 && xhr.status < 300){
+        let response = JSON.parse(xhr.responseText);
+        console.log(response);
+      }
+    }
+
+    //abrir request
+    xhr.open('POST', '/admin/lessons');
+
+    //setar o content type
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    //enviar request JSON
+    xhr.send(data);
+
+  }
+
+</script>

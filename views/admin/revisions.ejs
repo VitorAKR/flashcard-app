@@ -1,0 +1,293 @@
+<%- include("inc/header") -%>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <h1>
+          Revisões
+        </h1>
+        <ol class="breadcrumb">
+          <li><a  href="/"><i class="fa fa-home" style="color: #444"></i> Home</a></li>
+          <li class="active">Revisões</li>
+        </ol>
+      </section>
+
+      <!-- Main content -->
+      <section class="content container-fluid">
+        <div class="row">
+          <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+              <div class="small-box bg-red">
+                <div class="inner">
+                  <h3 id="numberCard">0</h3>
+                  <p>Flashcards para Revisão</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-ios-calendar"></i>
+                </div>
+              </div>
+            </div>
+        </div>
+          
+        <div class="box box-danger" id ="box-card-area" style="display: none;">
+          <div class="box-header">
+            <h3 class="box-title">Revisão das Lições</h3>
+          </div>
+          <div class="card_row">
+            <div class="card-container">
+              <div class="card">
+                  <div class="front">
+                      <div class="result"></div>
+                  </div>
+                  <div class="back">
+                      <div class="text"></div>
+                      <div class="category-card"></div>
+                      <div hidden class="category-lang"></div>
+                      <button onclick="speak()"><i class="fa fa-volume-up"></i>Ouvir</button>
+                  </div>
+              </div>
+            </div>
+          </div>
+            <!-- /.box-body -->
+          <div class="box-footer">
+            <button type="submit" onclick="btnReview()" class="btn btn-block btn-danger">Rever</button>
+            <button type="submit" onclick="btnDificult()" class="btn btn-block btn-warning">Difícil</button>
+            <button type="submit" onclick="btnGood()" class="btn btn-block btn-primary">Bom</button>
+            <button type="submit" onclick="btnPerfect()" class="btn btn-block btn-success">Perfeito</button>
+            
+            
+          </div>
+        </div>
+
+      </section>
+      <!-- /.content -->
+    </div>
+
+<%- include("inc/footer") -%>
+<script src="/js/audio-speechsynthesisutterance.js"></script>
+<script>
+  //puxar a lista de lições da rota
+  const jsonLessons = JSON.parse('<%- JSON.stringify(lessonsList) %>');
+  //definir variaveis globais
+  let reviewCards, currentIndexCard;
+  //pegar partes da tela de review
+  const revisionArea = document.getElementById("box-card-area");
+  let ef, repetitions = 0;
+  let date = new Date();
+
+  console.log(jsonLessons);
+  reviewCards = selectCardsForReview(jsonLessons);
+  //checa se a lista ta vazia pra revisões ou não
+  if(reviewCards === undefined || reviewCards.length == 0){
+    showModalCard(false);
+    countUpdate(0, 0);
+    alert("Você não possui mais flashcards para revisar hoje!");
+  }else{
+    console.log(reviewCards);
+    currentIndexCard = 0;
+    showModalCard(true);
+    showCard(reviewCards[currentIndexCard]);
+    countUpdate(currentIndexCard, reviewCards.length);
+  }
+
+  //-------------------------- Select cards to Review --------------------
+  function selectCardsForReview(array){
+    //retorna array com base na data
+    let filteredCards = array.filter((card) =>{
+      //pega data atual
+      let today = new Date();
+
+      //transforma string date do array em date
+      let stringDate = card.nextRevision.split('T');
+      let dtParts = stringDate[0].split('-');
+      let dateCard = new Date(dtParts[0], dtParts[1] - 1, dtParts[2]);
+      
+      //retorna cartões com data inferior ou igual ao hoje
+      if(dateCard <= today) return card;
+      
+    });
+/*     if(filteredCards.length == 0){
+      filteredCards = array;
+    }
+ */
+    return filteredCards;
+  }
+  //------------------------ NextCard -----------------------------------
+  function setNextCard(){
+    //se não chegou ao final das cartas incrementa a próxima
+    if(reviewCards.length > currentIndexCard+1){
+      currentIndexCard ++;
+      showCard(reviewCards[currentIndexCard]);
+      countUpdate(currentIndexCard, reviewCards.length);
+    }else{
+      alert("Parabéns! Estes foram os cartões para revisar hoje.");
+      window.location.reload();
+    }
+
+  }
+
+  //-------------------- Modal Area -------------------------------------
+  function showModalCard(show = true){
+    revisionArea.style.display = (show) ? 'block' : 'none';
+  }
+  //----------------------- Show Flashcard ----------------------------------
+  function showCard(card){
+    //colocar as infos do flashcard no html
+    document.querySelector(".result").innerText = card.front;
+    document.querySelector(".text").innerText = card.back;
+    document.querySelector(".category-card").innerText = card.category;
+    document.querySelector(".category-lang").innerText = card.lang;
+  }
+
+  //--------------------------- BTN Ouvir -------------------------------------
+  function speak(){
+    //checar se o audio esta disponível pro navegador
+    if ('speechSynthesis' in window) {
+      //pega o conteúdo do verso
+      let backText = document.querySelector(".text").innerText;
+      let backLang = document.querySelector(".category-lang").innerText;
+      //checa se o conteúdo está vazio
+      if (backText.length > 0) {
+        new AudioSpeechSynthesisUtterance(backText, backLang);
+      }else{
+        alert("Speech Synthesis: Não foi possível reproduzir o aúdio.")
+      }
+    } else {
+      alert("Infelizmente seu navegador não suporta Speech Synthesis!");
+    }
+  }
+
+  //--------- Definir qualidade ao clicar nos botões --------------------
+  function btnReview(){
+    date = scheduleReview(1, reviewCards[currentIndexCard]);
+    setTimesRepeated(1, reviewCards[currentIndexCard]);
+    //console.log(date);
+    setNextReview(date, reviewCards[currentIndexCard]);
+    saveData(reviewCards[currentIndexCard]);
+    
+    setNextCard();
+  }
+
+  function btnDificult(){
+    date = scheduleReview(2, reviewCards[currentIndexCard]);
+    setTimesRepeated(2, reviewCards[currentIndexCard]);
+    setNextReview(date, reviewCards[currentIndexCard]);
+    saveData(reviewCards[currentIndexCard]);
+    //console.log(date);
+    setNextCard();
+  }
+
+  function btnGood(){
+    date = scheduleReview(4, reviewCards[currentIndexCard]);
+    //console.log(date);
+    setTimesRepeated(4, reviewCards[currentIndexCard]);
+    setNextReview(date, reviewCards[currentIndexCard]);
+    saveData(reviewCards[currentIndexCard]);
+    setNextCard();
+  }
+
+  function btnPerfect(){
+    date = scheduleReview(5, reviewCards[currentIndexCard]);
+    setTimesRepeated(5, reviewCards[currentIndexCard]);
+    //console.log(date);
+    setNextReview(date, reviewCards[currentIndexCard]);
+    saveData(reviewCards[currentIndexCard]);
+    setNextCard();
+  }
+  //------------------------------- REVIEW ---------------------------------------------
+  function scheduleReview(quality, card){
+      //criar objeto de data e adicionar retorno de repetições a data atual
+      let currentDate = new Date();
+
+    if(quality < 3){
+      //se a qualidade informada for menor que 3, reseta o número de repetições e ef
+      ef = 2.5;
+      repetitions = 1;
+      card.ef = ef;
+      return addDays(currentDate, nextReview(repetitions, ef));
+    }else{
+      //pega o fator do card
+      ef = card.ef;  
+      //senão aumenta a qualidade
+      ef = updateEffort(quality, ef);
+      card.ef = ef;
+      return addDays(currentDate, nextReview(card.timesRepeated, ef));
+    }
+  }
+
+  function nextReview(cardRepetitions, ef){
+    if(cardRepetitions == 1 || cardRepetitions == 0){
+      return 1;
+    }else if(cardRepetitions == 2){
+      return 6;
+    }else{
+      let nextReviewDays = Math.round(nextReview(cardRepetitions-1) * ef);
+      return parseInt(nextReviewDays); 
+    }
+  }
+
+  function updateEffort(quality, ef){
+    let newEf = 0;
+
+    newEf = parseFloat(ef) + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+
+    if(newEf < 1.3){
+      newEf = 1.3;
+    }
+
+    return newEf;
+  }
+
+  function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+  //------------------------- SetNextReview ---------------------------------
+  function setNextReview(date, card){
+    card.nextRevision = date;
+  }
+
+  //------------------------- Setar vezes do cartão -------------------------
+  function setTimesRepeated(quality, card){
+    if(quality < 3){
+      card.timesRepeated = 1;
+    }else if(quality > 2 && quality <= 5){
+      card.timesRepeated ++;
+    }
+  }
+
+  //------------------------- Card Info -------------------------------------
+  function countUpdate(cardNumber, arraySize){
+    let countCards = arraySize - cardNumber;
+    document.getElementById("numberCard").innerText = countCards;
+  }
+  //------------------------ Enviar pro DB ----------------------------------
+  function saveData(card){
+
+  let data = JSON.stringify(card);
+
+  let xhr = new XMLHttpRequest();
+
+  xhr.onload = () =>{
+    //imprime JSON
+    if(xhr.status >= 200 && xhr.status < 300){
+      let response = JSON.parse(xhr.responseText);
+      console.log(response);
+    }
+  }
+
+  //abrir request
+  xhr.open('POST', '/admin/revisions');
+
+  //setar o content type
+  xhr.setRequestHeader('Content-Type', 'application/json');
+
+  //enviar request JSON
+  xhr.send(data);
+
+  }
+
+
+</script>
