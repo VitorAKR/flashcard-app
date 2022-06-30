@@ -17,4 +17,4 @@
 | Academic Work / Trabalho Acadêmico | Links |
 | ------ | ------ |
 | Undergraduate Thesis / Monografia | http://dsc.inf.furb.br/arquivos/tccs/monografias/2020_2_vitor-amarildo-kruger-reiter_monografia.pdf |
-| Presentation / Apresentação | http://dsc.inf.furb.br/arquivos/tccs/monografias/2020_2_vitor-amarildo-kruger-reiter_monografia.pdf |
+| Presentation / Apresentação | http://dsc.inf.furb.br/arquivos/tccs/apresentacoes/2020_2_vitor-amarildo-kruger-reiter_apresentacao.pdf |
